@@ -1,0 +1,49 @@
+name: Deploy to Hugging Face and Netlify
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Install dependencies
+      run: |
+        npm install
+        
+    - name: Build project
+      run: npm run build
+      
+    - name: Deploy to Netlify
+      uses: nwtgck/actions-netlify@v2
+      with:
+        publish-dir: .next
+        production-branch: main
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        deploy-message: "Deploy from GitHub Actions"
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        
+    - name: Deploy to Hugging Face
+      uses: hf-actions/huggingface-hub-deploy@v1
+      with:
+        repo_name: ${{ github.repository }}
+        repo_type: space
+        hf_token: ${{ secrets.HF_TOKEN }}
+        directory: .
+        space_hardware: "cpu-basic"
+        space_sdk: "static"
+        space_storage: "small"
+        space_private: "true"
