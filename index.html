@@ -35,6 +35,28 @@
             background-color: #e8f4f8;
             border-left: 4px solid #3498db;
         }
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.2em;
+            color: #555;
+        }
+        .stat p {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -43,6 +65,17 @@
             <h1>Salt Protocol</h1>
             <p>Decentralized salt trading and management</p>
         </header>
+
+        <div class="game-stats">
+            <div class="stat">
+                <h2>Salt</h2>
+                <p id="salt-balance">0</p>
+            </div>
+            <div class="stat">
+                <h2>Salt/sec</h2>
+                <p id="salt-per-second">1</p>
+            </div>
+        </div>
         
         <div class="status" id="status">
             System ready. Connect your wallet to begin.
@@ -50,9 +83,12 @@
         
         <div id="app">
             <!-- React app will be mounted here -->
-            <div style="text-align: center; padding: 40px 0;">
-                <button id="connect-wallet" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+            <div style="text-align: center; padding: 20px 0;">
+                <button id="connect-wallet" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 10px;">
                     Connect Wallet
+                </button>
+                <button id="increase-sps" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+                    Increase Salt/sec (cost: 10 Salt)
                 </button>
             </div>
         </div>
@@ -67,6 +103,34 @@
             setTimeout(() => {
                 status.textContent = 'Please install MetaMask to continue.';
             }, 1000);
+        });
+
+        // Game logic
+        let salt = 0;
+        let saltPerSecond = 1;
+        const saltBalanceElement = document.getElementById('salt-balance');
+        const saltPerSecondElement = document.getElementById('salt-per-second');
+
+        function updateSalt() {
+            salt += saltPerSecond;
+            saltBalanceElement.textContent = salt;
+        }
+
+        setInterval(updateSalt, 1000);
+
+        document.getElementById('increase-sps').addEventListener('click', () => {
+            if (salt >= 10) {
+                salt -= 10;
+                saltPerSecond++;
+                saltBalanceElement.textContent = salt;
+                saltPerSecondElement.textContent = saltPerSecond;
+            } else {
+                const status = document.getElementById('status');
+                status.textContent = 'Not enough salt to increase salt per second.';
+                setTimeout(() => {
+                    status.textContent = 'System ready. Connect your wallet to begin.';
+                }, 2000);
+            }
         });
     </script>
 </body>
